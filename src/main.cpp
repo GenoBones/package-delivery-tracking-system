@@ -16,6 +16,27 @@ struct Package
     string status;
 };
 
+// Function to load test packages into the system (below main)
+void loadTestPackages(vector<Package>& packages,
+                      queue<int>& processingQueue,
+                      unordered_map<string, int>& trackingLookup);
+
+
+// Qol function to pause the program until the user presses Enter
+void pressEnterToContinue(bool clearLeftoverNewline = false)
+{
+    string input;
+
+    if (clearLeftoverNewline)
+    {
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+
+    cout << endl;
+    cout << "Press Enter to continue...";
+    getline(cin, input);
+}
+
 bool trackingNumberIsValid(const string& trackingNumber)
 {
     if (trackingNumber.length() < 4 || trackingNumber.length() > 20)
@@ -146,6 +167,86 @@ void addPackage(vector<Package>& packages,
     cout << "Package " << newPackage.trackingNumber
          << " added successfully." << endl;
     cout << "Current status: " << newPackage.status << endl;
+
+    pressEnterToContinue(true);
+}
+
+void processNextPackage(vector<Package>& packages,
+                        queue<int>& processingQueue)
+{
+    cout << "--- PROCESS NEXT PACKAGE ---" << endl;
+
+    if (processingQueue.empty())
+    {
+        printError("There are no packages waiting to be processed.");
+        pressEnterToContinue(true);
+        return;
+    }
+
+    int packageIndex = processingQueue.front();
+
+    processingQueue.pop();
+
+    packages[packageIndex].status = "Processed";
+
+    cout << endl;
+    cout << "Package " << packages[packageIndex].trackingNumber
+         << " processed successfully." << endl;
+    cout << "Recipient: " << packages[packageIndex].recipient << endl;
+    cout << "Destination: " << packages[packageIndex].destination << endl;
+    cout << "Weight: " << packages[packageIndex].weight << " lbs" << endl;
+    cout << "Current status: " << packages[packageIndex].status << endl;
+
+    pressEnterToContinue(true);
+}
+
+void findPackage(const vector<Package>& packages,
+                 const unordered_map<string, int>& trackingLookup)
+{
+    string trackingNumber;
+
+    cout << "--- FIND PACKAGE ---" << endl;
+
+    // Clears the leftover newline
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    // More validation - may be worth making a helper if time allows.
+    while (true)
+    {
+        cout << "Enter tracking number: ";
+        getline(cin, trackingNumber);
+
+        if (trackingNumber.empty())
+        {
+            printError("Tracking number cannot be empty. Please enter a valid tracking number.");
+        }
+        else if (!trackingNumberIsValid(trackingNumber))
+        {
+            printError("Invalid tracking number. Please enter a valid tracking number.");
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    if (trackingLookup.count(trackingNumber) == 0)
+    {
+        printError("Package not found. Please check the tracking number.");
+        pressEnterToContinue();
+        return;
+    }
+
+    int packageIndex = trackingLookup.at(trackingNumber);
+
+    cout << endl;
+    cout << "Tracking number: " << packages[packageIndex].trackingNumber << endl;
+    cout << "Recipient: " << packages[packageIndex].recipient << endl;
+    cout << "Destination: " << packages[packageIndex].destination << endl;
+    cout << "Weight: " << packages[packageIndex].weight << " lbs" << endl;
+    cout << "Status: " << packages[packageIndex].status << endl;
+
+    pressEnterToContinue();
 }
 
 int main()
@@ -154,6 +255,8 @@ int main()
     vector<Package> packages;
     queue<int> processingQueue;
     unordered_map<string, int> trackingLookup;
+
+    loadTestPackages(packages, processingQueue, trackingLookup);
 
     int choice = 0;
 
@@ -189,11 +292,11 @@ int main()
             break;
 
         case 2:
-            cout << "Process Next Package selected." << endl;
+            processNextPackage(packages, processingQueue);
             break;
 
         case 3:
-            cout << "Find Package by Tracking Number selected." << endl;
+            findPackage(packages, trackingLookup);
             break;
 
         case 4:
@@ -228,3 +331,55 @@ int main()
     return 0;
 }
 
+// Test data
+void loadTestPackages(vector<Package>& packages,
+                      queue<int>& processingQueue,
+                      unordered_map<string, int>& trackingLookup)
+{
+    Package package1;
+    package1.trackingNumber = "PDTS1001";
+    package1.recipient = "John Smith";
+    package1.destination = "Sacramento, CA";
+    package1.weight = 12.5;
+    package1.status = "Waiting";
+
+    packages.push_back(package1);
+    processingQueue.push(0);
+    trackingLookup[package1.trackingNumber] = 0;
+
+
+    Package package2;
+    package2.trackingNumber = "PDTS1002";
+    package2.recipient = "Maria Lopez";
+    package2.destination = "San Francisco, CA";
+    package2.weight = 7.25;
+    package2.status = "Waiting";
+
+    packages.push_back(package2);
+    processingQueue.push(1);
+    trackingLookup[package2.trackingNumber] = 1;
+
+
+    Package package3;
+    package3.trackingNumber = "PDTS1003";
+    package3.recipient = "Tony Russo";
+    package3.destination = "Los Angeles, CA";
+    package3.weight = 22.8;
+    package3.status = "Waiting";
+
+    packages.push_back(package3);
+    processingQueue.push(2);
+    trackingLookup[package3.trackingNumber] = 2;
+
+
+    Package package4;
+    package4.trackingNumber = "PDTS1004";
+    package4.recipient = "Sarah Johnson";
+    package4.destination = "Reno, NV";
+    package4.weight = 4.75;
+    package4.status = "Waiting";
+
+    packages.push_back(package4);
+    processingQueue.push(3);
+    trackingLookup[package4.trackingNumber] = 3;
+}
