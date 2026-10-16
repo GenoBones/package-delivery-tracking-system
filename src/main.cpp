@@ -563,9 +563,88 @@ void displaySortedPackageReport(const vector<Package>& packages)
 }
 
 /*
+||||||||||||||||||||||||||||||||||||
+
+          SYSTEM SUMMARY
+
+||||||||||||||||||||||||||||||||||||
+*/
+void displaySystemSummary(const vector<Package>& packages)
+{
+    cout << "--- SYSTEM SUMMARY ---" << endl;
+
+    if (packages.empty())
+    {
+        cout << endl;
+        cout << "Total packages: 0" << endl;
+        cout << "Waiting: 0" << endl;
+        cout << "Processed: 0" << endl;
+        cout << "In Transit: 0" << endl;
+        cout << "Delivered: 0" << endl;
+        cout << "Total weight: 0 lbs" << endl;
+        cout << "Average weight: 0 lbs" << endl;
+        cout << "Heaviest package: N/A" << endl;
+
+        pressEnterToContinue(true);
+        return;
+    }
+
+    int waitingCount = 0;
+    int processedCount = 0;
+    int inTransitCount = 0;
+    int deliveredCount = 0;
+
+    double totalWeight = 0;
+
+    int heaviestPackageIndex = 0;
+
+    for (int i = 0; i < packages.size(); i++)
+    {
+        totalWeight += packages[i].weight;
+
+        if (packages[i].status == "Waiting")
+        {
+            waitingCount++;
+        }
+        else if (packages[i].status == "Processed")
+        {
+            processedCount++;
+        }
+        else if (packages[i].status == "In Transit")
+        {
+            inTransitCount++;
+        }
+        else if (packages[i].status == "Delivered")
+        {
+            deliveredCount++;
+        }
+
+        if (packages[i].weight > packages[heaviestPackageIndex].weight)
+        {
+            heaviestPackageIndex = i;
+        }
+    }
+
+    double averageWeight = totalWeight / packages.size();
+
+    cout << endl;
+    cout << "Total packages: " << packages.size() << endl;
+    cout << "Waiting: " << waitingCount << endl;
+    cout << "Processed: " << processedCount << endl;
+    cout << "In Transit: " << inTransitCount << endl;
+    cout << "Delivered: " << deliveredCount << endl;
+    cout << "Total weight: " << totalWeight << " lbs" << endl;
+    cout << "Average weight: " << averageWeight << " lbs" << endl;
+    cout << "Heaviest package: " << packages[heaviestPackageIndex].trackingNumber
+         << " (" << packages[heaviestPackageIndex].weight << " lbs)" << endl;
+
+    pressEnterToContinue(true);
+}
+
+/*
 ||||||||||||||||||||||||||||||||||||||
  
-                MAIN
+             *** MAIN ***
 
 ||||||||||||||||||||||||||||||||||||||
 */
@@ -636,7 +715,7 @@ int main()
             break;
 
         case 8:
-            cout << "Display System Summary selected." << endl;
+            displaySystemSummary(packages);
             break;
 
         case 9:
