@@ -451,6 +451,120 @@ void displayAllPackages(const vector<Package>& packages)
 /*
 ||||||||||||||||||||||||||||||||||||||
  
+       SORTED PACKAGE REPORT
+
+||||||||||||||||||||||||||||||||||||||
+*/
+
+void insertionSortByTrackingNumber(vector<Package>& packages)
+{
+    for (int i = 1; i < packages.size(); i++)
+    {
+        Package currentPackage = packages[i];
+        int j = i - 1;
+
+        while (j >= 0 && packages[j].trackingNumber > currentPackage.trackingNumber)
+        {
+            packages[j + 1] = packages[j];
+            j--;
+        }
+
+        packages[j + 1] = currentPackage;
+    }
+}
+
+void insertionSortByWeight(vector<Package>& packages)
+{
+    for (int i = 1; i < packages.size(); i++)
+    {
+        Package currentPackage = packages[i];
+        int j = i - 1;
+
+        while (j >= 0 && packages[j].weight > currentPackage.weight)
+        {
+            packages[j + 1] = packages[j];
+            j--;
+        }
+
+        packages[j + 1] = currentPackage;
+    }
+}
+
+void displaySortedPackageReport(const vector<Package>& packages)
+{
+    cout << "--- SORTED PACKAGE REPORT ---" << endl;
+
+    if (packages.empty())
+    {
+        printError("There are no packages in the system.");
+        pressEnterToContinue(true);
+        return;
+    }
+
+    vector<Package> sortedPackages = packages;
+
+    int sortChoice = 0;
+
+    while (true)
+    {
+        cout << endl;
+        cout << "1. Sort by Tracking Number" << endl;
+        cout << "2. Sort by Weight" << endl;
+        cout << "3. Cancel" << endl;
+        cout << endl;
+        cout << "Selection -> ";
+        cin >> sortChoice;
+
+        if (cin.fail())
+        {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            printError("Please enter a valid selection.");
+        }
+        else if (sortChoice < 1 || sortChoice > 3)
+        {
+            printError("Please enter a number from 1 through 3.");
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    if (sortChoice == 3)
+    {
+        return;
+    }
+
+    if (sortChoice == 1)
+    {
+        insertionSortByTrackingNumber(sortedPackages);
+    }
+    else if (sortChoice == 2)
+    {
+        insertionSortByWeight(sortedPackages);
+    }
+
+    cout << endl;
+    cout << "--- SORTED PACKAGE REPORT ---" << endl;
+
+    for (int i = 0; i < sortedPackages.size(); i++)
+    {
+        cout << endl;
+        cout << "Package " << i + 1 << endl;
+        cout << "Tracking number: " << sortedPackages[i].trackingNumber << endl;
+        cout << "Recipient: " << sortedPackages[i].recipient << endl;
+        cout << "Destination: " << sortedPackages[i].destination << endl;
+        cout << "Weight: " << sortedPackages[i].weight << " lbs" << endl;
+        cout << "Status: " << sortedPackages[i].status << endl;
+    }
+
+    pressEnterToContinue(true);
+}
+
+/*
+||||||||||||||||||||||||||||||||||||||
+ 
                 MAIN
 
 ||||||||||||||||||||||||||||||||||||||
@@ -518,7 +632,7 @@ int main()
             break;
 
         case 7:
-            cout << "Display Sorted Package Report selected." << endl;
+            displaySortedPackageReport(packages);
             break;
 
         case 8:
